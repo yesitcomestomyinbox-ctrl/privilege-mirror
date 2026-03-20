@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import PrivilegeDashboard from "./privilege-dashboard";
 import DailyMirror from "./daily-privilege-mirror";
 
@@ -85,6 +86,7 @@ export default function App() {
         backdropFilter: "blur(8px)", letterSpacing: "0.06em",
       }}>← Home</button>
       <PrivilegeDashboard />
+      <Analytics />
     </div>
   );
 
@@ -98,6 +100,7 @@ export default function App() {
         backdropFilter: "blur(8px)", letterSpacing: "0.06em",
       }}>← Home</button>
       <DailyMirror />
+      <Analytics />
     </div>
   );
 
@@ -400,6 +403,7 @@ export default function App() {
           Statistics sourced from UN, WHO, World Bank & UNHCR
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
