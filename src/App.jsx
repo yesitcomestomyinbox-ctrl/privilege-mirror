@@ -12,30 +12,21 @@ const TICKER_STATS = [
   "1 in 3 women experience violence in their lifetime",
   "770 million people have no access to electricity",
   "Only 13% of the world holds a passport",
-  "A child soldier is recruited somewhere in the world every hour",
+  "A child soldier is recruited somewhere every hour",
 ];
 
-function StatTicker() {
+function StatTicker({ dark }) {
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
-
   useEffect(() => {
     const cycle = setInterval(() => {
       setVisible(false);
-      setTimeout(() => {
-        setIdx(i => (i + 1) % TICKER_STATS.length);
-        setVisible(true);
-      }, 400);
+      setTimeout(() => { setIdx(i => (i + 1) % TICKER_STATS.length); setVisible(true); }, 400);
     }, 3800);
     return () => clearInterval(cycle);
   }, []);
-
   return (
-    <div style={{
-      fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: "0.08em",
-      color: "rgba(255,255,255,0.28)", transition: "opacity 0.4s ease",
-      opacity: visible ? 1 : 0, textAlign: "center", minHeight: 20,
-    }}>
+    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.06em", color: dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.38)", transition: "opacity 0.4s ease", opacity: visible ? 1 : 0, textAlign: "center", minHeight: 22, padding: "0 16px" }}>
       {TICKER_STATS[idx]}
     </div>
   );
@@ -48,7 +39,7 @@ function CountUp({ target, duration = 1800 }) {
     const obs = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) {
         let start = null;
-        const step = (ts) => {
+        const step = ts => {
           if (!start) start = ts;
           const prog = Math.min((ts - start) / duration, 1);
           setVal(Math.floor(prog * target));
@@ -66,338 +57,312 @@ function CountUp({ target, duration = 1800 }) {
 
 export default function App() {
   const [page, setPage] = useState("home");
+  const [dark, setDark] = useState(true);
   const [hovered, setHovered] = useState(null);
   const [scrollY, setScrollY] = useState(0);
 
+  // Theme tokens
+  const D = {
+    bg:         dark ? "#080809"               : "#F5F2EC",
+    bg2:        dark ? "#0f0f10"               : "#EDEAE3",
+    text:       dark ? "#E8E0D0"               : "#1A1810",
+    textMid:    dark ? "rgba(255,255,255,0.55)": "rgba(0,0,0,0.55)",
+    textLow:    dark ? "rgba(255,255,255,0.28)": "rgba(0,0,0,0.32)",
+    border:     dark ? "rgba(255,255,255,0.07)": "rgba(0,0,0,0.1)",
+    borderMid:  dark ? "rgba(255,255,255,0.14)": "rgba(0,0,0,0.18)",
+    cardBg:     dark ? "rgba(255,255,255,0.02)": "rgba(255,255,255,0.75)",
+    goldText:   dark ? "#E6C87A"               : "#8B6914",
+    goldBg:     dark ? "rgba(230,200,122,0.07)": "rgba(180,140,40,0.07)",
+    goldBorder: dark ? "rgba(230,200,122,0.14)": "rgba(180,140,40,0.18)",
+    redText:    dark ? "#ff8866"               : "#993300",
+    redBg:      dark ? "rgba(255,68,68,0.07)"  : "rgba(200,40,0,0.06)",
+    redBorder:  dark ? "rgba(255,68,68,0.14)"  : "rgba(200,40,0,0.14)",
+    red:        dark ? "#ff6644"               : "#CC3300",
+  };
+
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const fn = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  const navBack = () => { setPage("home"); window.scrollTo(0, 0); };
+
+  const NavBar = ({ bgColor }) => (
+    <div style={{ position: "fixed", top: 12, left: 12, zIndex: 999, display: "flex", gap: 8 }}>
+      <button onClick={navBack} style={{ background: bgColor, border: `1px solid ${D.border}`, color: D.textMid, padding: "7px 14px", borderRadius: 3, fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer", backdropFilter: "blur(8px)", letterSpacing: "0.06em" }}>← Home</button>
+      <button onClick={() => setDark(d => !d)} style={{ background: bgColor, border: `1px solid ${D.border}`, color: D.textMid, padding: "7px 12px", borderRadius: 3, fontFamily: "'DM Mono',monospace", fontSize: 12, cursor: "pointer", backdropFilter: "blur(8px)" }}>{dark ? "☀️" : "🌙"}</button>
+    </div>
+  );
+
   if (page === "survey") return (
-    <div>
-      <button onClick={() => setPage("home")} style={{
-        position: "fixed", top: 16, left: 20, zIndex: 999,
-        background: "rgba(10,10,11,0.9)", border: "1px solid rgba(255,255,255,0.12)",
-        color: "rgba(255,255,255,0.5)", padding: "7px 14px", borderRadius: 3,
-        fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer",
-        backdropFilter: "blur(8px)", letterSpacing: "0.06em",
-      }}>← Home</button>
+    <div style={{ background: dark ? "#0A0A0B" : "#F5F2EC", minHeight: "100vh" }}>
+      <NavBar bgColor={dark ? "rgba(10,10,11,0.92)" : "rgba(245,242,236,0.92)"} />
       <PrivilegeDashboard />
     </div>
   );
 
   if (page === "mirror") return (
-    <div>
-      <button onClick={() => setPage("home")} style={{
-        position: "fixed", top: 16, left: 20, zIndex: 999,
-        background: "rgba(12,12,12,0.9)", border: "1px solid rgba(255,255,255,0.12)",
-        color: "rgba(255,255,255,0.5)", padding: "7px 14px", borderRadius: 3,
-        fontFamily: "Georgia,serif", fontSize: 10, cursor: "pointer",
-        backdropFilter: "blur(8px)", letterSpacing: "0.06em",
-      }}>← Home</button>
+    <div style={{ background: dark ? "#0C0C0C" : "#F5F2EC", minHeight: "100vh" }}>
+      <NavBar bgColor={dark ? "rgba(12,12,12,0.92)" : "rgba(245,242,236,0.92)"} />
       <DailyMirror />
     </div>
   );
 
   return (
-    <div style={{ background: "#080809", color: "#E8E0D0", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ background: D.bg, color: D.text, minHeight: "100vh", overflowX: "hidden", transition: "background 0.3s, color 0.3s" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500&family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #222; }
+        ::-webkit-scrollbar-thumb { background: #888; }
         html { scroll-behavior: smooth; }
 
         @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: none; }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; } to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slowDrift {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          33%  { transform: translate(30px,-20px) scale(1.05); }
-          66%  { transform: translate(-20px, 15px) scale(0.97); }
-        }
-        @keyframes lineGrow {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
-        }
-        @keyframes counterUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
+          0%,100% { transform: translate(0,0) scale(1); }
+          33%     { transform: translate(20px,-15px) scale(1.03); }
+          66%     { transform: translate(-15px,12px) scale(0.98); }
         }
 
-        .hero-word {
-          display: inline-block;
-          animation: fadeSlideUp 0.7s cubic-bezier(0.16,1,0.3,1) both;
-        }
+        .hero-word { display: block; animation: fadeSlideUp 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+
         .tool-card {
-          position: relative; overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 6px; cursor: pointer;
-          transition: border-color 0.3s, transform 0.3s;
+          border-radius: 8px; cursor: pointer;
+          transition: transform 0.25s, box-shadow 0.25s; overflow: hidden;
         }
-        .tool-card:hover {
-          transform: translateY(-4px);
-        }
-        .tool-card::before {
-          content: '';
-          position: absolute; inset: 0;
-          opacity: 0; transition: opacity 0.3s;
-          pointer-events: none;
-        }
-        .tool-card.survey::before {
-          background: radial-gradient(ellipse at 30% 50%, rgba(230,200,122,0.08), transparent 70%);
-        }
-        .tool-card.mirror::before {
-          background: radial-gradient(ellipse at 70% 50%, rgba(255,68,68,0.07), transparent 70%);
-        }
-        .tool-card:hover::before { opacity: 1; }
-        .stat-num {
-          font-family: 'Bebas Neue', sans-serif;
-          animation: counterUp 0.6s ease both;
-        }
+        .tool-card:hover { transform: translateY(-3px); }
+        .tool-card:active { transform: scale(0.98); }
+
         .enter-btn {
-          display: inline-flex; align-items: center; gap: 10px;
-          padding: 13px 28px; border-radius: 3px;
-          font-family: 'DM Mono', monospace; font-size: 11px;
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          padding: 14px 28px; border-radius: 4px;
+          font-family: 'DM Mono', monospace; font-size: 12px;
           letter-spacing: 0.1em; text-transform: uppercase;
-          cursor: pointer; transition: all 0.22s; border: none;
+          cursor: pointer; transition: all 0.2s; border: none;
         }
-        .enter-btn.gold {
-          background: #E6C87A; color: #080809;
+        .enter-btn.gold  { background: #C8A84B; color: #080809; }
+        .enter-btn.gold:hover { background: #d4b455; }
+
+        .theme-btn {
+          position: fixed; top: 14px; right: 16px; z-index: 200;
+          border-radius: 20px; padding: 7px 16px;
+          font-family: 'DM Mono', monospace; font-size: 11px;
+          cursor: pointer; transition: all 0.25s;
+          display: flex; align-items: center; gap: 6px;
+          letter-spacing: 0.06em;
         }
-        .enter-btn.gold:hover { background: #f0d48a; transform: translateY(-1px); }
-        .enter-btn.outline {
-          background: transparent; color: rgba(255,255,255,0.55);
-          border: 1px solid rgba(255,255,255,0.15) !important;
-          border: none;
-        }
-        .enter-btn.outline:hover { color: #E8E0D0; border-color: rgba(255,255,255,0.35) !important; }
-        .divider-line {
-          height: 1px; background: rgba(255,255,255,0.07);
-          transform-origin: left; animation: lineGrow 1s ease both;
-        }
-        .quote-mark {
-          font-family: 'Crimson Pro', serif;
-          font-size: 120px; line-height: 0.7;
-          color: rgba(255,255,255,0.04);
-          position: absolute; top: 20px; left: 20px;
-          pointer-events: none; user-select: none;
-        }
-        .noise-overlay {
-          position: fixed; inset: 0; pointer-events: none; z-index: 0;
-          opacity: 0.025;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+          .tools-grid  { grid-template-columns: 1fr !important; }
+          .stats-grid  { grid-template-columns: 1fr 1fr !important; }
+          .cta-row     { flex-direction: column !important; align-items: stretch !important; }
+          .cta-row .enter-btn { width: 100% !important; max-width: 100% !important; }
+          .footer-row  { flex-direction: column !important; text-align: center !important; }
+          .quote-text  { font-size: 17px !important; }
         }
       `}</style>
 
-      <div className="noise-overlay" />
+      {/* Theme toggle */}
+      <button
+        className="theme-btn"
+        onClick={() => setDark(d => !d)}
+        style={{ background: D.bg, border: `1px solid ${D.border}`, color: D.textMid }}
+      >
+        {dark ? "☀️ Light" : "🌙 Dark"}
+      </button>
 
-      {/* ── HERO ── */}
-      <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "80px 24px 60px", textAlign: "center", position: "relative" }}>
+      {/* ══ HERO ══ */}
+      <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "80px 24px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
 
-        {/* Ambient glow blobs */}
+        {/* Glow blobs */}
         <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(230,200,122,0.04) 0%, transparent 70%)", top: "10%", left: "10%", animation: "slowDrift 18s ease-in-out infinite" }} />
-          <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,68,68,0.04) 0%, transparent 70%)", bottom: "15%", right: "10%", animation: "slowDrift 22s ease-in-out infinite reverse" }} />
+          <div style={{ position: "absolute", width: 480, height: 480, borderRadius: "50%", background: `radial-gradient(circle, ${dark ? "rgba(230,200,122,0.05)" : "rgba(180,140,40,0.07)"} 0%, transparent 70%)`, top: "5%", left: "5%", animation: "slowDrift 18s ease-in-out infinite" }} />
+          <div style={{ position: "absolute", width: 380, height: 380, borderRadius: "50%", background: `radial-gradient(circle, ${dark ? "rgba(255,68,68,0.04)" : "rgba(200,40,0,0.04)"} 0%, transparent 70%)`, bottom: "10%", right: "5%", animation: "slowDrift 22s ease-in-out infinite reverse" }} />
         </div>
 
-        <div style={{ position: "relative", maxWidth: 780 }}>
-          {/* Eyebrow */}
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 36, animation: "fadeIn 1s ease both" }}>
+        <div style={{ position: "relative", maxWidth: 720, width: "100%" }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 32, animation: "fadeIn 1s ease both" }}>
             A Project About What We Forget
           </div>
 
-          {/* Main headline */}
-          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(64px, 13vw, 128px)", lineHeight: 0.92, letterSpacing: "0.01em", marginBottom: 36 }}>
-            <span className="hero-word" style={{ animationDelay: "0.1s", color: "#E8E0D0", display: "block" }}>You Are</span>
-            <span className="hero-word" style={{ animationDelay: "0.25s", color: "#E6C87A", display: "block" }}>Luckier</span>
-            <span className="hero-word" style={{ animationDelay: "0.4s", color: "rgba(255,255,255,0.25)", display: "block", fontSize: "0.55em", letterSpacing: "0.06em" }}>than you think.</span>
+          <h1 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(52px, 14vw, 116px)", lineHeight: 0.92, letterSpacing: "0.01em", marginBottom: 32 }}>
+            <span className="hero-word" style={{ animationDelay: "0.1s", color: D.text }}>You Are</span>
+            <span className="hero-word" style={{ animationDelay: "0.25s", color: D.goldText }}>Luckier</span>
+            <span className="hero-word" style={{ animationDelay: "0.4s", color: D.textLow, fontSize: "0.5em", letterSpacing: "0.06em" }}>than you think.</span>
           </h1>
 
-          {/* Subhead */}
-          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(17px, 2.5vw, 22px)", color: "rgba(255,255,255,0.42)", lineHeight: 1.75, maxWidth: 560, margin: "0 auto 20px", animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.5s" }}>
+          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(15px, 2.4vw, 20px)", color: D.textMid, lineHeight: 1.8, maxWidth: 520, margin: "0 auto 14px", animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.5s" }}>
             Not because your life is easy. But because systems were quietly working <em>for</em> you while others were quietly crushed by the same systems.
           </p>
-          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(15px, 2vw, 18px)", color: "rgba(255,255,255,0.28)", lineHeight: 1.75, maxWidth: 540, margin: "0 auto 52px", animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.65s" }}>
-            Two tools. No preaching. Just honesty about where you stand — and a gentle push to do something about it.
+          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(13px, 1.8vw, 17px)", color: D.textLow, lineHeight: 1.75, maxWidth: 460, margin: "0 auto 44px", animation: "fadeSlideUp 0.8s ease both", animationDelay: "0.65s" }}>
+            Two tools. No preaching. Just honesty about where you stand — and a nudge to do something about it.
           </p>
 
-          {/* CTA row */}
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.8s" }}>
-            <button className="enter-btn gold" onClick={() => { setPage("survey"); window.scrollTo(0,0); }}>
-              Take the Survey
-              <span style={{ opacity: 0.6 }}>→</span>
+          <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 8px", animation: "fadeSlideUp 0.7s ease both", animationDelay: "0.8s" }}>
+            <button className="enter-btn gold" onClick={() => { setPage("survey"); window.scrollTo(0, 0); }} style={{ flex: "1 1 200px", maxWidth: 300 }}>
+              Take the Survey →
             </button>
-            <button className="enter-btn outline" style={{ border: "1px solid rgba(255,255,255,0.15)" }} onClick={() => { setPage("mirror"); window.scrollTo(0,0); }}>
-              Open the Mirror
-              <span style={{ opacity: 0.4 }}>→</span>
+            <button className="enter-btn" onClick={() => { setPage("mirror"); window.scrollTo(0, 0); }}
+              style={{ flex: "1 1 200px", maxWidth: 300, background: "transparent", border: `1px solid ${D.borderMid}`, color: D.textMid }}>
+              Open the Mirror →
             </button>
           </div>
 
-          {/* Ticker */}
-          <div style={{ marginTop: 56, animation: "fadeIn 1.2s ease both", animationDelay: "1s" }}>
-            <StatTicker />
+          <div style={{ marginTop: 44, animation: "fadeIn 1.2s ease both", animationDelay: "1s" }}>
+            <StatTicker dark={dark} />
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: scrollY > 50 ? 0 : 0.3, transition: "opacity 0.4s" }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: "0.15em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Scroll</div>
-          <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, rgba(255,255,255,0.3), transparent)" }} />
+        {/* Scroll hint */}
+        <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: scrollY > 40 ? 0 : 0.22, transition: "opacity 0.4s", pointerEvents: "none" }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: "0.15em", color: D.textLow, textTransform: "uppercase" }}>Scroll</div>
+          <div style={{ width: 1, height: 32, background: `linear-gradient(to bottom, ${D.textLow}, transparent)` }} />
         </div>
       </section>
 
-      {/* ── NUMBERS THAT HIT ── */}
-      <section style={{ padding: "80px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: "0.22em", textTransform: "uppercase", textAlign: "center", marginBottom: 56 }}>
-            While you read this
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 1, background: "rgba(255,255,255,0.06)" }}>
+      {/* ══ NUMBERS ══ */}
+      <section style={{ padding: "60px 24px", borderTop: `1px solid ${D.border}`, borderBottom: `1px solid ${D.border}`, background: D.bg2, transition: "background 0.3s" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.22em", textTransform: "uppercase", textAlign: "center", marginBottom: 40 }}>While you read this</div>
+          <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, background: D.border, borderRadius: 4, overflow: "hidden" }}>
             {[
-              { num: 733, unit: "million", label: "people go hungry tonight", color: "#E6C87A" },
-              { num: 2200, unit: "million", label: "lack clean drinking water", color: "#7AB8E6" },
-              { num: 100, unit: "million+", label: "people forcibly displaced", color: "#E68A7A" },
-              { num: 160, unit: "million", label: "children in child labour", color: "#A87AE6" },
+              { num: 733,  unit: "million",  label: "people go hungry tonight",   color: D.goldText },
+              { num: 2200, unit: "million",  label: "lack clean drinking water",  color: "#5B9FD4"  },
+              { num: 100,  unit: "million+", label: "people forcibly displaced",  color: D.redText  },
+              { num: 160,  unit: "million",  label: "children in child labour",   color: "#9B7AE6"  },
             ].map((s, i) => (
-              <div key={i} style={{ background: "#080809", padding: "36px 28px", textAlign: "center" }}>
-                <div className="stat-num" style={{ fontSize: "clamp(42px, 7vw, 68px)", color: s.color, lineHeight: 1, marginBottom: 6 }}>
+              <div key={i} style={{ background: D.bg2, padding: "28px 16px", textAlign: "center" }}>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(34px, 5.5vw, 58px)", color: s.color, lineHeight: 1, marginBottom: 4 }}>
                   <CountUp target={s.num} />
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", marginBottom: 10 }}>{s.unit}</div>
-                <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: 14, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{s.label}</div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.1em", marginBottom: 7 }}>{s.unit}</div>
+                <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: 13, color: D.textMid, lineHeight: 1.5 }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── TWO TOOLS ── */}
-      <section style={{ padding: "100px 24px" }}>
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 64 }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 16 }}>Two ways in</div>
-            <h2 style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(28px, 5vw, 48px)", fontWeight: 300, color: "rgba(255,255,255,0.8)", lineHeight: 1.3 }}>
+      {/* ══ TWO TOOLS ══ */}
+      <section style={{ padding: "80px 24px" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 14 }}>Two ways in</div>
+            <h2 style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(22px, 4vw, 40px)", fontWeight: 300, color: D.text, lineHeight: 1.35 }}>
               One shows you your position.<br />
-              <em style={{ color: "rgba(255,255,255,0.4)" }}>The other shows you your blind spots.</em>
+              <em style={{ color: D.textLow }}>The other shows you your blind spots.</em>
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="tools-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
 
-            {/* Tool 1 — Survey */}
+            {/* Card 1 — Survey */}
             <div
-              className="tool-card survey"
-              onClick={() => { setPage("survey"); window.scrollTo(0,0); }}
+              className="tool-card"
+              onClick={() => { setPage("survey"); window.scrollTo(0, 0); }}
               onMouseEnter={() => setHovered("survey")}
               onMouseLeave={() => setHovered(null)}
-              style={{ borderColor: hovered === "survey" ? "rgba(230,200,122,0.3)" : "rgba(255,255,255,0.07)" }}
+              style={{ background: D.cardBg, border: `1px solid ${hovered === "survey" ? "rgba(200,168,75,0.4)" : D.border}`, boxShadow: hovered === "survey" ? `0 8px 28px ${dark ? "rgba(200,168,75,0.08)" : "rgba(180,140,40,0.12)"}` : "none" }}
             >
-              <div className="quote-mark">"</div>
-              <div style={{ padding: "44px 40px 40px", position: "relative" }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: "rgba(230,200,122,0.5)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Tool 01</div>
-                <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, letterSpacing: "0.03em", color: "#E8E0D0", marginBottom: 16, lineHeight: 1 }}>
-                  Privilege<br />Dashboard
+              <div style={{ padding: "32px 24px 24px" }}>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: D.goldText, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, opacity: 0.6 }}>Tool 01</div>
+                <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "0.02em", color: D.text, marginBottom: 12, lineHeight: 1.05 }}>
+                  Privilege Dashboard
                 </h3>
-                <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 16, color: "rgba(255,255,255,0.45)", lineHeight: 1.75, marginBottom: 28 }}>
-                  A 62-question structured assessment across 7 dimensions — economic, geographic, racial, gender, health, education, and social. You answer honestly, it shows you exactly where you hold structural advantage and where you face systemic barriers.
+                <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 15, color: D.textMid, lineHeight: 1.72, marginBottom: 20 }}>
+                  A 62-question structured assessment across 7 dimensions. Honest answers reveal exactly where you hold structural advantage and where you face systemic barriers.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 36 }}>
-                  {["62 questions", "7 dimensions", "Radar chart", "Specific insights", "Named advantages & barriers"].map(tag => (
-                    <span key={tag} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(230,200,122,0.55)", background: "rgba(230,200,122,0.07)", border: "1px solid rgba(230,200,122,0.12)", padding: "4px 10px", borderRadius: 2 }}>{tag}</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 24 }}>
+                  {["62 questions", "7 dimensions", "Radar chart", "Named insights"].map(tag => (
+                    <span key={tag} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.goldText, background: D.goldBg, border: `1px solid ${D.goldBorder}`, padding: "3px 8px", borderRadius: 2 }}>{tag}</span>
                   ))}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'DM Mono', monospace", fontSize: 11, color: hovered === "survey" ? "#E6C87A" : "rgba(255,255,255,0.3)", letterSpacing: "0.08em", transition: "color 0.2s" }}>
-                  Take the survey <span style={{ fontSize: 14 }}>→</span>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: hovered === "survey" ? D.goldText : D.textLow, letterSpacing: "0.07em", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6 }}>
+                  Take the survey →
                 </div>
               </div>
-              {/* Bottom accent bar */}
-              <div style={{ height: 3, background: "linear-gradient(to right, #E6C87A, transparent)", opacity: hovered === "survey" ? 1 : 0.3, transition: "opacity 0.3s" }} />
+              <div style={{ height: 3, background: `linear-gradient(to right, ${D.goldText}, transparent)`, opacity: hovered === "survey" ? 1 : 0.25, transition: "opacity 0.3s" }} />
             </div>
 
-            {/* Tool 2 — Mirror */}
+            {/* Card 2 — Mirror */}
             <div
-              className="tool-card mirror"
-              onClick={() => { setPage("mirror"); window.scrollTo(0,0); }}
+              className="tool-card"
+              onClick={() => { setPage("mirror"); window.scrollTo(0, 0); }}
               onMouseEnter={() => setHovered("mirror")}
               onMouseLeave={() => setHovered(null)}
-              style={{ borderColor: hovered === "mirror" ? "rgba(255,68,68,0.3)" : "rgba(255,255,255,0.07)" }}
+              style={{ background: D.cardBg, border: `1px solid ${hovered === "mirror" ? "rgba(255,68,68,0.35)" : D.border}`, boxShadow: hovered === "mirror" ? `0 8px 28px ${dark ? "rgba(255,68,68,0.07)" : "rgba(200,40,0,0.08)"}` : "none" }}
             >
-              <div className="quote-mark">"</div>
-              <div style={{ padding: "44px 40px 40px", position: "relative" }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: "rgba(255,100,100,0.5)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Tool 02</div>
-                <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, letterSpacing: "0.03em", color: "#E8E0D0", marginBottom: 16, lineHeight: 1 }}>
-                  Daily<br />Mirror
+              <div style={{ padding: "32px 24px 24px" }}>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: D.redText, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, opacity: 0.6 }}>Tool 02</div>
+                <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(28px, 4.5vw, 42px)", letterSpacing: "0.02em", color: D.text, marginBottom: 12, lineHeight: 1.05 }}>
+                  Daily Mirror
                 </h3>
-                <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 16, color: "rgba(255,255,255,0.45)", lineHeight: 1.75, marginBottom: 28 }}>
-                  Check off the ordinary things you did today — ate, took a cab, complained about bad WiFi. Then read what that same moment looks like for someone else on this planet right now. 20 moments. Each one a gut punch.
+                <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 15, color: D.textMid, lineHeight: 1.72, marginBottom: 20 }}>
+                  Check off the ordinary things you did today — ate, took a cab, complained about bad WiFi. Then read what that same moment looks like for someone else on this planet. 20 moments. Each one a gut punch.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 36 }}>
-                  {["20 daily moments", "Real statistics", "Side-by-side reality", "Brutal verdict", "Concrete actions"].map(tag => (
-                    <span key={tag} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,100,100,0.55)", background: "rgba(255,68,68,0.07)", border: "1px solid rgba(255,68,68,0.12)", padding: "4px 10px", borderRadius: 2 }}>{tag}</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 24 }}>
+                  {["20 moments", "Real statistics", "Side-by-side", "Concrete actions"].map(tag => (
+                    <span key={tag} style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.redText, background: D.redBg, border: `1px solid ${D.redBorder}`, padding: "3px 8px", borderRadius: 2 }}>{tag}</span>
                   ))}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'DM Mono', monospace", fontSize: 11, color: hovered === "mirror" ? "#ff8888" : "rgba(255,255,255,0.3)", letterSpacing: "0.08em", transition: "color 0.2s" }}>
-                  Open the mirror <span style={{ fontSize: 14 }}>→</span>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: hovered === "mirror" ? D.redText : D.textLow, letterSpacing: "0.07em", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6 }}>
+                  Open the mirror →
                 </div>
               </div>
-              <div style={{ height: 3, background: "linear-gradient(to right, #ff6644, transparent)", opacity: hovered === "mirror" ? 1 : 0.3, transition: "opacity 0.3s" }} />
+              <div style={{ height: 3, background: `linear-gradient(to right, ${D.red}, transparent)`, opacity: hovered === "mirror" ? 1 : 0.25, transition: "opacity 0.3s" }} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── THE QUOTE THAT STARTED THIS ── */}
-      <section style={{ padding: "80px 24px 100px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(18px, 3vw, 26px)", fontStyle: "italic", color: "rgba(255,255,255,0.38)", lineHeight: 1.85, marginBottom: 32 }}>
+      {/* ══ QUOTE ══ */}
+      <section style={{ padding: "72px 24px 84px", borderTop: `1px solid ${D.border}`, background: D.bg2, transition: "background 0.3s" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", textAlign: "center" }}>
+          <div className="quote-text" style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(16px, 2.6vw, 23px)", fontStyle: "italic", color: D.textMid, lineHeight: 1.88, marginBottom: 28 }}>
             "Someone wishes they had more time with their dog.<br />
             Someone wishes they had more time with their loved ones.<br />
             A kid from a war-torn country wishes he could bring his brother back to life —<br />
             with a smile on his face and a broken heart."
           </div>
-          <div style={{ width: 32, height: 1, background: "rgba(255,255,255,0.12)", margin: "0 auto 32px" }} />
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "rgba(255,255,255,0.2)", lineHeight: 1.8 }}>
+          <div style={{ width: 28, height: 1, background: D.border, margin: "0 auto 28px" }} />
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: D.textLow, lineHeight: 1.85 }}>
             There is a world that doesn't give 2 shits about this.<br />
-            <span style={{ color: "rgba(255,255,255,0.4)" }}>Be the part of the world that does.</span>
+            <span style={{ color: D.textMid }}>Be the part of the world that does.</span>
           </div>
         </div>
       </section>
 
-      {/* ── FINAL CTA ── */}
-      <section style={{ padding: "80px 24px", background: "rgba(230,200,122,0.03)", borderTop: "1px solid rgba(230,200,122,0.08)" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(36px, 7vw, 64px)", letterSpacing: "0.04em", marginBottom: 20, color: "#E8E0D0", lineHeight: 1 }}>
-            Where do you<br /><span style={{ color: "#E6C87A" }}>actually stand?</span>
+      {/* ══ FINAL CTA ══ */}
+      <section style={{ padding: "72px 24px", background: D.goldBg, borderTop: `1px solid ${D.goldBorder}` }}>
+        <div style={{ maxWidth: 540, margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "clamp(32px, 7vw, 58px)", letterSpacing: "0.03em", marginBottom: 14, color: D.text, lineHeight: 1 }}>
+            Where do you<br /><span style={{ color: D.goldText }}>actually stand?</span>
           </h2>
-          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 17, color: "rgba(255,255,255,0.38)", lineHeight: 1.75, marginBottom: 40 }}>
-            Not in terms of hard work or merit — you can hold on to those.<br />
+          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: 16, color: D.textMid, lineHeight: 1.75, marginBottom: 34 }}>
+            Not in terms of hard work or merit.<br />
             In terms of what the world handed you before you had a say.
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="enter-btn gold" onClick={() => { setPage("survey"); window.scrollTo(0,0); }}>
-              Take the Survey →
-            </button>
-            <button className="enter-btn outline" style={{ border: "1px solid rgba(255,255,255,0.15)" }} onClick={() => { setPage("mirror"); window.scrollTo(0,0); }}>
-              Open the Mirror →
-            </button>
+          <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 8px" }}>
+            <button className="enter-btn gold" onClick={() => { setPage("survey"); window.scrollTo(0, 0); }} style={{ flex: "1 1 180px" }}>Take the Survey →</button>
+            <button className="enter-btn" onClick={() => { setPage("mirror"); window.scrollTo(0, 0); }}
+              style={{ flex: "1 1 180px", background: "transparent", border: `1px solid ${D.borderMid}`, color: D.textMid }}>Open the Mirror →</button>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{ padding: "28px 32px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.15)", letterSpacing: "0.12em" }}>
+      {/* ══ FOOTER ══ */}
+      <footer className="footer-row" style={{ padding: "22px 28px", borderTop: `1px solid ${D.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, background: D.bg, transition: "background 0.3s" }}>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.09em" }}>
           No ads. No data collected. No newsletter. Just a mirror.
         </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: "rgba(255,255,255,0.1)", letterSpacing: "0.1em" }}>
-          Statistics sourced from UN, WHO, World Bank & UNHCR
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: D.textLow, letterSpacing: "0.07em" }}>
+          Data: UN · WHO · World Bank · UNHCR
         </div>
       </footer>
     </div>
